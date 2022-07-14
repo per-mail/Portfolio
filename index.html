@@ -1,0 +1,87 @@
+---
+layout: article
+title: Московский клуб программистов
+excerpt: Тяжела и неказиста жизнь простого программиста
+---
+
+<p>Как выяснилось, в Москве есть большая потребность в неформальных встречах программистов,
+без привязки к конкретным технологиям и языкам.</p>
+
+<p>Ниша «посидеть и поговорить» оказалась незаполненной.
+Этот пробел требует немедленной ликвидации, которой мы и занимаемся.</p>
+
+<p><a href="/blog/">Блог клуба программистов</a>.</p>
+
+<div id="posts">
+</div>
+
+<script>
+  window.addEventListener('load', function() {
+    var request = new XMLHttpRequest();
+    request.open('GET', 'https://markshevchenko.pro/feed.xml', true);
+    request.onload = function(data) {
+      if (data.target.status >= 200 && data.target.status < 300) {
+        var feed = data.target.responseXML;
+        var entries = feed.querySelectorAll('entry');
+        for (var i = 0; i < entries.length; i++) {
+          var post = parsePost(entries[i]);
+          appendPost(post);
+        }
+      }
+    };
+
+    request.send();
+
+    function parsePost(entry) {
+      return {
+        title: getAttribute(entry, 'link', 'title'),
+        href: getAttribute(entry, 'link', 'href'),
+        published: getTextContent(entry, 'published'),
+        author: getTextContent(entry, 'author > name'),
+        summary: getTextContent(entry, 'summary')
+      };
+    }
+
+    function getAttribute(entry, selector, attributeName) {
+      var element = entry.querySelector(selector);
+
+      return (element == null) ? null : element.getAttribute(attributeName);
+    }
+
+    function getTextContent(entry, selector) {
+      var element = entry.querySelector(selector);
+
+      return (element == null) ? null : element.textContent;
+    }
+
+    function appendPost(post) {
+      appendHeaderLink(post.title, post.href);
+      
+      appendParagraph(post.published, 'date');
+      appendParagraph(post.author, 'author');
+      appendParagraph(post.summary);
+    }
+
+    function appendHeaderLink(title, href) {
+      var a = document.createElement('a');
+      a.setAttribute('href', href);
+      a.appendChild(document.createTextNode(title));
+      
+      var h2 = document.createElement('h2');
+      h2.appendChild(a);
+
+      document.getElementById('posts').appendChild(h2);
+    }
+
+    function appendParagraph(text, className) {
+      if (text == null)
+        return;
+
+      var p = document.createElement('p');
+      p.setAttribute('class', className);
+      p.appendChild(document.createTextNode(text));
+
+      document.getElementById('posts').appendChild(p);
+    }
+  });
+</script>
